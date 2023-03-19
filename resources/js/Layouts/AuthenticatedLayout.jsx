@@ -59,24 +59,6 @@ export default function Authenticated({ auth, header, children }) {
                             <span className="ml-4">Products</span>
                         </NavLink>
                         <NavLink
-                            href={route("order-details.index")}
-                            active={route().current("order-details.index")}
-                        >
-                            <svg
-                                className="w-5 h-5"
-                                aria-hidden="true"
-                                fill="none"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
-                            </svg>{" "}
-                            <span className="ml-4">Order Details</span>
-                        </NavLink>
-                        <NavLink
                             href={route("orders.index")}
                             active={route().current("orders.index")}
                         >
@@ -93,6 +75,24 @@ export default function Authenticated({ auth, header, children }) {
                                 <path fill="currentColor" d="M21.5,15a3,3,0,0,0-1.9-2.78l1.87-7a1,1,0,0,0-.18-.87A1,1,0,0,0,20.5,4H6.8L6.47,2.74A1,1,0,0,0,5.5,2h-2V4H4.73l2.48,9.26a1,1,0,0,0,1,.74H18.5a1,1,0,0,1,0,2H5.5a1,1,0,0,0,0,2H6.68a3,3,0,1,0,5.64,0h2.36a3,3,0,1,0,5.82,1,2.94,2.94,0,0,0-.4-1.47A3,3,0,0,0,21.5,15Zm-3.91-3H9L7.34,6H19.2ZM9.5,20a1,1,0,1,1,1-1A1,1,0,0,1,9.5,20Zm8,0a1,1,0,1,1,1-1A1,1,0,0,1,17.5,20Z"/>
                             </svg>{" "}
                             <span className="ml-4">Orders</span>
+                        </NavLink>
+                        <NavLink
+                            href={route("order-details.index")}
+                            active={route().current("order-details.index")}
+                        >
+                            <svg
+                                className="w-5 h-5"
+                                aria-hidden="true"
+                                fill="none"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                            </svg>{" "}
+                            <span className="ml-4">Order Details</span>
                         </NavLink>
                         <NavLink
                             href={route("payments.index")}

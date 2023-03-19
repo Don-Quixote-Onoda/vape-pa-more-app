@@ -16,9 +16,16 @@ import { InputNumber } from "primereact/inputnumber";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
+import { TabMenu } from "primereact/tabmenu";
 
 export default function Products(props) {
     const [products, setProducts] = useState([]);
+
+    const [activeIndex, setActiveIndex] = useState(0);
+    const items = [
+        { label: "Products", icon: "pi pi-fw pi-home" },
+        { label: "Product Details", icon: "pi pi-fw pi-calendar" },
+    ];
 
     useEffect(() => {
         setProducts(props.products);
@@ -75,7 +82,7 @@ export default function Products(props) {
         setSubmitted(true);
 
         if (product.name.trim()) {
-            let _products = [...products];
+            let _products = [...products];  
             let _product = { ...product };
 
             if (product.id) {
@@ -388,7 +395,14 @@ export default function Products(props) {
                 </h2>
             }
         >
-            <div className="container px-6 mx-auto grid">
+            <div className="card">
+                <TabMenu
+                    model={items}
+                    activeIndex={activeIndex}
+                    onTabChange={(e) => setActiveIndex(e.index)}
+                />
+            </div>
+            {activeIndex == 0 && <div className="container px-6 mx-auto grid">
                 <h2 className="my-6 text-2xl font-semibold text-gray-700 dark:text-gray-200">
                     Products
                 </h2>
@@ -668,7 +682,289 @@ export default function Products(props) {
                         </Dialog>
                     </div>
                 </div>
-            </div>
+            </div>}
+
+            {activeIndex == 1 && <div className="container px-6 mx-auto grid">
+                <h2 className="my-6 text-2xl font-semibold text-gray-700 dark:text-gray-200">
+                    Product Details
+                </h2>
+                <div className="w-full mb-8 overflow-hidden rounded-lg shadow-xs">
+                    <div className="w-full overflow-x-auto card">
+                        <Toast ref={toast} />
+                        <div className="card">
+                            <Toolbar
+                                className="mb-4"
+                                left={leftToolbarTemplate}
+                                right={rightToolbarTemplate}
+                            ></Toolbar>
+
+                            <DataTable
+                                ref={dt}
+                                value={products}
+                                selection={selectedProducts}
+                                onSelectionChange={(e) =>
+                                    setSelectedProducts(e.value)
+                                }
+                                dataKey="id"
+                                paginator
+                                rows={10}
+                                rowsPerPageOptions={[5, 10, 25]}
+                                paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+                                globalFilter={globalFilter}
+                                header={header}
+                            >
+                                <Column
+                                    selectionMode="multiple"
+                                    exportable={false}
+                                ></Column>
+                                <Column
+                                    field="product_name"
+                                    header="Name"
+                                    sortable
+                                    style={{ minWidth: "16rem" }}
+                                ></Column>
+                                <Column
+                                    field="image"
+                                    header="Image"
+                                    body={imageBodyTemplate}
+                                ></Column>
+                                <Column
+                                    field="price"
+                                    header="Price"
+                                    body={priceBodyTemplate}
+                                    sortable
+                                    style={{ minWidth: "8rem" }}
+                                ></Column>
+                                <Column
+                                    field="quantity"
+                                    header="Quantity"
+                                    sortable
+                                    style={{ minWidth: "10rem" }}
+                                ></Column>
+                                <Column
+                                    field="product_type_id"
+                                    header="Type"
+                                    sortable
+                                    style={{ minWidth: "12rem" }}
+                                ></Column>
+                                <Column
+                                    field="status"
+                                    header="Status"
+                                    sortable
+                                    style={{ minWidth: "12rem" }}
+                                ></Column>
+                                <Column
+                                    body={actionBodyTemplate}
+                                    exportable={false}
+                                    style={{ minWidth: "12rem" }}
+                                ></Column>
+                            </DataTable>
+                        </div>
+                        <Dialog
+                            visible={productDialog}
+                            style={{ width: "32rem" }}
+                            breakpoints={{ "960px": "75vw", "641px": "90vw" }}
+                            header="Product Details"
+                            modal
+                            className="p-fluid"
+                            footer={productDialogFooter}
+                            onHide={hideDialog}
+                        >
+                            {product.image && (
+                                <img
+                                    src={`https://primefaces.org/cdn/primereact/images/product/${product.image}`}
+                                    alt={product.image}
+                                    className="product-image block m-auto pb-3"
+                                />
+                            )}
+                            <div className="field">
+                                <label htmlFor="name" className="font-bold">
+                                    Name
+                                </label>
+                                <InputText
+                                    id="name"
+                                    value={product.name}
+                                    onChange={(e) => onInputChange(e, "name")}
+                                    required
+                                    autoFocus
+                                    className={classNames({
+                                        "p-invalid": submitted && !product.name,
+                                    })}
+                                />
+                                {submitted && !product.name && (
+                                    <small className="p-error">
+                                        Name is required.
+                                    </small>
+                                )}
+                            </div>
+                            <div className="field">
+                                <label
+                                    htmlFor="description"
+                                    className="font-bold"
+                                >
+                                    Description
+                                </label>
+                                <InputTextarea
+                                    id="description"
+                                    value={product.description}
+                                    onChange={(e) =>
+                                        onInputChange(e, "description")
+                                    }
+                                    required
+                                    rows={3}
+                                    cols={20}
+                                />
+                            </div>
+                            <div className="field">
+                                <label className="mb-3 font-bold">
+                                    Category
+                                </label>
+                                <div className="formgrid grid">
+                                    <div className="field-radiobutton col-6">
+                                        <RadioButton
+                                            inputId="category1"
+                                            name="category"
+                                            value="Accessories"
+                                            onChange={onCategoryChange}
+                                            checked={
+                                                product.category ===
+                                                "Accessories"
+                                            }
+                                        />
+                                        <label htmlFor="category1">
+                                            Accessories
+                                        </label>
+                                    </div>
+                                    <div className="field-radiobutton col-6">
+                                        <RadioButton
+                                            inputId="category2"
+                                            name="category"
+                                            value="Clothing"
+                                            onChange={onCategoryChange}
+                                            checked={
+                                                product.category === "Clothing"
+                                            }
+                                        />
+                                        <label htmlFor="category2">
+                                            Clothing
+                                        </label>
+                                    </div>
+                                    <div className="field-radiobutton col-6">
+                                        <RadioButton
+                                            inputId="category3"
+                                            name="category"
+                                            value="Electronics"
+                                            onChange={onCategoryChange}
+                                            checked={
+                                                product.category ===
+                                                "Electronics"
+                                            }
+                                        />
+                                        <label htmlFor="category3">
+                                            Electronics
+                                        </label>
+                                    </div>
+                                    <div className="field-radiobutton col-6">
+                                        <RadioButton
+                                            inputId="category4"
+                                            name="category"
+                                            value="Fitness"
+                                            onChange={onCategoryChange}
+                                            checked={
+                                                product.category === "Fitness"
+                                            }
+                                        />
+                                        <label htmlFor="category4">
+                                            Fitness
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="formgrid grid">
+                                <div className="field col">
+                                    <label
+                                        htmlFor="price"
+                                        className="font-bold"
+                                    >
+                                        Price
+                                    </label>
+                                    <InputNumber
+                                        id="price"
+                                        value={product.price}
+                                        onValueChange={(e) =>
+                                            onInputNumberChange(e, "price")
+                                        }
+                                        mode="currency"
+                                        currency="USD"
+                                        locale="en-US"
+                                    />
+                                </div>
+                                <div className="field col">
+                                    <label
+                                        htmlFor="quantity"
+                                        className="font-bold"
+                                    >
+                                        Quantity
+                                    </label>
+                                    <InputNumber
+                                        id="quantity"
+                                        value={product.quantity}
+                                        onValueChange={(e) =>
+                                            onInputNumberChange(e, "quantity")
+                                        }
+                                    />
+                                </div>
+                            </div>
+                        </Dialog>
+
+                        <Dialog
+                            visible={deleteProductDialog}
+                            style={{ width: "32rem" }}
+                            breakpoints={{ "960px": "75vw", "641px": "90vw" }}
+                            header="Confirm"
+                            modal
+                            footer={deleteProductDialogFooter}
+                            onHide={hideDeleteProductDialog}
+                        >
+                            <div className="confirmation-content">
+                                <i
+                                    className="pi pi-exclamation-triangle mr-3"
+                                    style={{ fontSize: "2rem" }}
+                                />
+                                {product && (
+                                    <span>
+                                        Are you sure you want to delete{" "}
+                                        <b>{product.name}</b>?
+                                    </span>
+                                )}
+                            </div>
+                        </Dialog>
+                        <Dialog
+                            visible={deleteProductsDialog}
+                            style={{ width: "32rem" }}
+                            breakpoints={{ "960px": "75vw", "641px": "90vw" }}
+                            header="Confirm"
+                            modal
+                            footer={deleteProductsDialogFooter}
+                            onHide={hideDeleteProductsDialog}
+                        >
+                            <div className="confirmation-content">
+                                <i
+                                    className="pi pi-exclamation-triangle mr-3"
+                                    style={{ fontSize: "2rem" }}
+                                />
+                                {product && (
+                                    <span>
+                                        Are you sure you want to delete the
+                                        selected products?
+                                    </span>
+                                )}
+                            </div>
+                        </Dialog>
+                    </div>
+                </div>
+            </div>}
         </AuthenticatedLayout>
     );
 }

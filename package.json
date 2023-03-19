@@ -35,6 +35,7 @@
         "flowbite": "^1.6.3",
         "flowbite-react": "^0.4.1",
         "material-table": "^2.0.3",
+        "primeflex": "^3.3.0",
         "primeicons": "^6.0.1",
         "primereact": "^9.2.0",
         "prop-types": "^15.8.1",

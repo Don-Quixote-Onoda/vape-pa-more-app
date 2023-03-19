@@ -1,5 +1,5 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import { Head } from "@inertiajs/react";
 import React, { useState, useEffect, useRef } from "react";
 import { classNames } from "primereact/utils";
 import { DataTable } from "primereact/datatable";
@@ -15,9 +15,11 @@ import { InputNumber } from "primereact/inputnumber";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
+import { Calendar } from "primereact/calendar";
+import { Dropdown } from "primereact/dropdown";
+import { useForm } from "@inertiajs/react";
 
 export default function Users(props) {
-
     const [users, setUsers] = useState([]);
 
     useEffect(() => {
@@ -27,9 +29,17 @@ export default function Users(props) {
 
     let emptyUser = {
         id: null,
-        name: "",
+        firstname: "",
+        lastname: "",
+        sex: 0,
+        birthdate: null,
+        address: "",
+        phoneNumber: null,
         email: null,
         role: "",
+        password: null,
+        confirm_password: null,
+        image: null,
     };
 
     const [userDialog, setUserDialog] = useState(false);
@@ -41,6 +51,10 @@ export default function Users(props) {
     const [globalFilter, setGlobalFilter] = useState(null);
     const toast = useRef(null);
     const dt = useRef(null);
+
+    const { data, setData, post, processing, errors } = useForm(emptyUser);
+
+    const roles = [{ name: "Administrator" }, { name: "Employee" }];
 
     const formatCurrency = (value) => {
         return value.toLocaleString("en-US", {
@@ -71,8 +85,19 @@ export default function Users(props) {
     const saveUser = () => {
         setSubmitted(true);
 
-        if (user.name.trim()) {
-            let _users = [...users];
+        if (
+            user.image &&
+            user.firstname.trim() &&
+            user.lastname.trim() &&
+            user.sex &&
+            user.birthdate &&
+            user.address &&
+            user.role &&
+            user.phoneNumber &&
+            user.email &&
+            user.confirm_password
+        ) {
+            let _users = [...users];  
             let _user = { ...user };
 
             if (user.id) {
@@ -82,9 +107,10 @@ export default function Users(props) {
                 toast.current.show({
                     severity: "success",
                     summary: "Successful",
-                    detail: "User Updated",
+                    detail: "Product Updated",
                     life: 3000,
                 });
+
             } else {
                 _user.id = createId();
                 _user.image = "user-placeholder.svg";
@@ -92,21 +118,28 @@ export default function Users(props) {
                 toast.current.show({
                     severity: "success",
                     summary: "Successful",
-                    detail: "User Created",
+                    detail: "Product Created",
                     life: 3000,
                 });
             }
-
-            setUsers(_users);
+            setData(user);
+            post('api/user');
             setUserDialog(false);
             setUser(emptyUser);
         }
+        // // console.log('Ok');
+        
+
+        
+
+        
     };
 
     const editUser = (user) => {
         setUser({ ...user });
         setUserDialog(true);
     };
+    
 
     const confirmDeleteUser = (user) => {
         setUser(user);
@@ -180,9 +213,7 @@ export default function Users(props) {
     };
 
     const deleteSelectedUsers = () => {
-        let _users = users.filter(
-            (val) => !selectedUsers.includes(val)
-        );
+        let _users = users.filter((val) => !selectedUsers.includes(val));
 
         setUsers(_users);
         setDeleteUsersDialog(false);
@@ -198,7 +229,8 @@ export default function Users(props) {
     const onCategoryChange = (e) => {
         let _user = { ...user };
 
-        _user["category"] = e.value;
+        _user["sex"] = e.value;
+
         setUser(_user);
     };
 
@@ -211,6 +243,15 @@ export default function Users(props) {
         setUser(_user);
     };
 
+    const onRoleChange = (e, name) => {
+        const val = (e.target && e.target.value) || "";
+        let _user = { ...user };
+
+        _user[`${name}`] = val.name;
+
+        setUser(_user);
+    };
+
     const onInputNumberChange = (e, name) => {
         const val = e.value || 0;
         let _user = { ...user };
@@ -219,6 +260,17 @@ export default function Users(props) {
 
         setUser(_user);
     };
+
+    const confirmPassword = (e, name) => {
+        const val = (e.target && e.target.value) || "";
+        let _user = { ...user };
+
+        if(user.password == val) {
+            _user[`${name}`] = val;
+        }
+
+        setUser(_user);
+    }
 
     const leftToolbarTemplate = () => {
         return (
@@ -254,13 +306,24 @@ export default function Users(props) {
     const imageBodyTemplate = (rowData) => {
         return (
             <img
-                src={`https://primefaces.org/cdn/primereact/images/user/${rowData.image}`}
+                src={`http://127.0.0.1:8000/uploads/${rowData.image}`}
                 alt={rowData.image}
                 className="shadow-2 border-round"
                 style={{ width: "64px" }}
             />
         );
     };
+
+    const handleFileUpload = (e, name) => {
+        const val = (e.target && e.target.files[0]) || "";
+        let _user = { ...user };
+
+        _user[`${name}`] = val;
+        setUser(_user);
+
+        console.log(_user);
+
+    }
 
     const priceBodyTemplate = (rowData) => {
         return formatCurrency(rowData.price);
@@ -416,9 +479,34 @@ export default function Users(props) {
                                     selectionMode="multiple"
                                     exportable={false}
                                 ></Column>
+                                 <Column field="image" header="Image" body={imageBodyTemplate}></Column>
                                 <Column
-                                    field="name"
-                                    header="Name"
+                                    field="firstname"
+                                    header="First Name"
+                                    sortable
+                                    style={{ minWidth: "16rem" }}
+                                ></Column>
+                                <Column
+                                    field="lastname"
+                                    header="Last Name"
+                                    sortable
+                                    style={{ minWidth: "16rem" }}
+                                ></Column>
+                                <Column
+                                    field="address"
+                                    header="Address"
+                                    sortable
+                                    style={{ minWidth: "16rem" }}
+                                ></Column>
+                                <Column
+                                    field="phone_number"
+                                    header="Phone Number"
+                                    sortable
+                                    style={{ minWidth: "16rem" }}
+                                ></Column>
+                                <Column
+                                    field="birthdate"
+                                    header="Birthdate"
                                     sortable
                                     style={{ minWidth: "16rem" }}
                                 ></Column>
@@ -427,6 +515,12 @@ export default function Users(props) {
                                     header="Email"
                                     sortable
                                     style={{ minWidth: "8rem" }}
+                                ></Column>
+                                <Column
+                                    field="sex"
+                                    header="Sex"
+                                    sortable
+                                    style={{ minWidth: "10rem" }}
                                 ></Column>
                                 <Column
                                     field="role"
@@ -451,150 +545,275 @@ export default function Users(props) {
                             footer={userDialogFooter}
                             onHide={hideDialog}
                         >
-                            {user.image && (
-                                <img
-                                    src={`https://primefaces.org/cdn/primereact/images/user/${user.image}`}
-                                    alt={user.image}
-                                    className="user-image block m-auto pb-3"
-                                />
-                            )}
                             <div className="field">
-                                <label htmlFor="name" className="font-bold">
-                                    Name
-                                </label>
-                                <InputText
-                                    id="name"
-                                    value={user.name}
-                                    onChange={(e) => onInputChange(e, "name")}
-                                    required
-                                    autoFocus
-                                    className={classNames({
-                                        "p-invalid": submitted && !user.name,
-                                    })}
-                                />
-                                {submitted && !user.name && (
+                            <label className="">User Image</label>
+                            <input
+                                type="file"
+                                className={`w-full px-4 py-2 ${classNames({
+                                    "p-invalid":
+                                        submitted && !user.image,
+                                })}`}
+                                label="Image"
+                                name="image"
+                                onChange={(e) =>
+                                    handleFileUpload(e, "image")
+                                }
+                            />
+                                {submitted && !user.image && (
                                     <small className="p-error">
-                                        Name is required.
+                                        User Image is required.
                                     </small>
                                 )}
                             </div>
                             <div className="field">
                                 <label
-                                    htmlFor="description"
+                                    htmlFor="firstname"
                                     className="font-bold"
                                 >
-                                    Description
+                                    First Name
                                 </label>
-                                <InputTextarea
-                                    id="description"
-                                    value={user.description}
+                                <InputText
+                                    id="firstname"
+                                    value={user.firstname}
                                     onChange={(e) =>
-                                        onInputChange(e, "description")
+                                        onInputChange(e, "firstname")
                                     }
                                     required
-                                    rows={3}
-                                    cols={20}
+                                    autoFocus
+                                    className={classNames({
+                                        "p-invalid":
+                                            submitted && !user.firstname,
+                                    })}
                                 />
+                                {submitted && !user.firstname && (
+                                    <small className="p-error">
+                                        First Name is required.
+                                    </small>
+                                )}
                             </div>
                             <div className="field">
-                                <label className="mb-3 font-bold">
-                                    Category
+                                <label htmlFor="lastname" className="font-bold">
+                                    Last Name
                                 </label>
-                                <div className="formgrid grid">
-                                    <div className="field-radiobutton col-6">
-                                        <RadioButton
-                                            inputId="category1"
-                                            name="category"
-                                            value="Accessories"
-                                            onChange={onCategoryChange}
-                                            checked={
-                                                user.category ===
-                                                "Accessories"
-                                            }
-                                        />
-                                        <label htmlFor="category1">
-                                            Accessories
-                                        </label>
-                                    </div>
-                                    <div className="field-radiobutton col-6">
-                                        <RadioButton
-                                            inputId="category2"
-                                            name="category"
-                                            value="Clothing"
-                                            onChange={onCategoryChange}
-                                            checked={
-                                                user.category === "Clothing"
-                                            }
-                                        />
-                                        <label htmlFor="category2">
-                                            Clothing
-                                        </label>
-                                    </div>
-                                    <div className="field-radiobutton col-6">
-                                        <RadioButton
-                                            inputId="category3"
-                                            name="category"
-                                            value="Electronics"
-                                            onChange={onCategoryChange}
-                                            checked={
-                                                user.category ===
-                                                "Electronics"
-                                            }
-                                        />
-                                        <label htmlFor="category3">
-                                            Electronics
-                                        </label>
-                                    </div>
-                                    <div className="field-radiobutton col-6">
-                                        <RadioButton
-                                            inputId="category4"
-                                            name="category"
-                                            value="Fitness"
-                                            onChange={onCategoryChange}
-                                            checked={
-                                                user.category === "Fitness"
-                                            }
-                                        />
-                                        <label htmlFor="category4">
-                                            Fitness
-                                        </label>
-                                    </div>
-                                </div>
+                                <InputText
+                                    id="lastname"
+                                    value={user.lastname}
+                                    onChange={(e) =>
+                                        onInputChange(e, "lastname")
+                                    }
+                                    required
+                                    autoFocus
+                                    className={classNames({
+                                        "p-invalid":
+                                            submitted && !user.lastname,
+                                    })}
+                                />
+                                {submitted && !user.lastname && (
+                                    <small className="p-error">
+                                        Last Name is required.
+                                    </small>
+                                )}
                             </div>
-                            <div className="formgrid grid">
-                                <div className="field col">
-                                    <label
-                                        htmlFor="price"
-                                        className="font-bold"
-                                    >
-                                        Price
-                                    </label>
-                                    <InputNumber
-                                        id="price"
-                                        value={user.price}
-                                        onValueChange={(e) =>
-                                            onInputNumberChange(e, "price")
-                                        }
-                                        mode="currency"
-                                        currency="USD"
-                                        locale="en-US"
+                            <div className="field mb-5">
+                                <label className="mb-3 font-bold">Sex</label>
+                                <div className="field-radiobutton col-6">
+                                    <RadioButton
+                                        inputId="sex1"
+                                        name="sex"
+                                        value="Male"
+                                        onChange={onCategoryChange}
+                                        checked={user.sex === "Male"}
+                                        className={classNames({
+                                            "p-invalid": submitted && !user.sex,
+                                        })}
                                     />
-                                </div>
-                                <div className="field col">
-                                    <label
-                                        htmlFor="quantity"
-                                        className="font-bold"
-                                    >
-                                        Quantity
+                                    <label htmlFor="sex1" className="ml-1">
+                                        Male
                                     </label>
-                                    <InputNumber
-                                        id="quantity"
-                                        value={user.quantity}
-                                        onValueChange={(e) =>
-                                            onInputNumberChange(e, "quantity")
-                                        }
-                                    />
                                 </div>
+                                <div className="field-radiobutton col-6">
+                                    <RadioButton
+                                        inputId="sex2"
+                                        name="sex"
+                                        value="Female"
+                                        onChange={onCategoryChange}
+                                        checked={user.sex === "Female"}
+                                        className={classNames({
+                                            "p-invalid": submitted && !user.sex,
+                                        })}
+                                    />
+                                    <label htmlFor="sex2" className="ml-1">
+                                        Female
+                                    </label>
+                                </div>
+                                {submitted && !user.sex && (
+                                    <small className="p-error">
+                                        Sex is required.
+                                    </small>
+                                )}
+                            </div>
+                            <div className="field mb-5">
+                                <label htmlFor="last" className="font-bold">
+                                    Birthdate
+                                </label>
+                                <Calendar
+                                    id="last"
+                                    value={user.birthdate}
+                                    onChange={(e) =>
+                                        onInputChange(e, "birthdate")
+                                    }
+                                    className={classNames({
+                                        "p-invalid": submitted && !user.birthdate,
+                                    })}
+                                />
+                                {submitted && !user.birthdate && (
+                                    <small className="p-error">
+                                        Birthdate is required.
+                                    </small>
+                                )}
+                            </div>
+
+                            <div className="field mb-5">
+                                <label htmlFor="address" className="font-bold">
+                                    Address
+                                </label>
+                                <InputText
+                                    id="address"
+                                    value={user.address}
+                                    onChange={(e) =>
+                                        onInputChange(e, "address")
+                                    }
+                                    required
+                                    autoFocus
+                                    className={classNames({
+                                        "p-invalid": submitted && !user.address,
+                                    })}
+                                />
+                                {submitted && !user.address && (
+                                    <small className="p-error">
+                                        Address is required.
+                                    </small>
+                                )}
+                            </div>
+
+                            <div className="field mb-5">
+                                <label htmlFor="email" className="font-bold">
+                                    Role
+                                </label>
+                                <Dropdown
+                                    value={user.role}
+                                    onChange={(e) => onRoleChange(e, "role")}
+                                    options={roles}
+                                    optionLabel="name"
+                                    editable
+                                    placeholder="Select a City"
+                                    className={`w-full md:w-14rem ${classNames({
+                                        "p-invalid": submitted && !user.address,
+                                    })} `}
+                                />
+                                {submitted && !user.sex && (
+                                    <small className="p-error">
+                                        Role is required.
+                                    </small>
+                                )}
+                            </div>
+                            <div className="field mb-5">
+                                <label
+                                    htmlFor="phoneNumber"
+                                    className="font-bold"
+                                >
+                                    Phone Number
+                                </label>
+                                <InputNumber
+                                    id="phoneNumber"
+                                    value={user.phoneNumber}
+                                    onChange={(e) =>
+                                        onInputNumberChange(e, "phoneNumber")
+                                    }
+                                    useGrouping={false}
+                                    required
+                                    autoFocus
+                                    className={classNames({
+                                        "p-invalid":
+                                            submitted && !user.phoneNumber,
+                                    })}
+                                />
+                                {submitted && !user.phoneNumber && (
+                                    <small className="p-error">
+                                        Phone Number is required.
+                                    </small>
+                                )}
+                            </div>
+                            <div className="field mb-5">
+                                <label htmlFor="email" className="font-bold">
+                                    Email Address
+                                </label>
+                                <InputText
+                                    id="email"
+                                    value={user.email}
+                                    onChange={(e) => onInputChange(e, "email")}
+                                    required
+                                    autoFocus
+                                    className={classNames({
+                                        "p-invalid": submitted && !user.email,
+                                    })}
+                                />
+                                {submitted && !user.email && (
+                                    <small className="p-error">
+                                        Email Address is required.
+                                    </small>
+                                )}
+                            </div>
+
+                            <div className="field mb-5">
+                                <label htmlFor="password" className="font-bold">
+                                    Password
+                                </label>
+                                <InputText
+                                    id="password"
+                                    value={user.password}
+                                    onChange={(e) =>
+                                        onInputChange(e, "password")
+                                    }
+                                    required
+                                    autoFocus
+                                    className={classNames({
+                                        "p-invalid":
+                                            submitted && !user.password,
+                                    })}
+                                />
+                                {submitted && !user.password && (
+                                    <small className="p-error">
+                                        Password is required.
+                                    </small>
+                                )}
+                            </div>
+
+                            <div className="field">
+                                <label
+                                    htmlFor="confirm_password"
+                                    className="font-bold"
+                                >
+                                    Confirm Password
+                                </label>
+                                <InputText
+                                    id="confirm_password"
+                                    value={user.confirm_password}
+                                    onChange={(e) =>
+                                        confirmPassword(e, "confirm_password")
+                                    }
+                                    required
+                                    autoFocus
+                                    className={classNames({
+                                        "p-invalid":
+                                            submitted && !user.confirm_password,
+                                    })}
+                                />
+                                {submitted && !user.confirm_password && (
+                                    <small className="p-error">
+                                        Password don't match.
+                                    </small>
+                                )}
                             </div>
                         </Dialog>
 

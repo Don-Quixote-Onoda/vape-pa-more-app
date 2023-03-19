@@ -13,7 +13,18 @@ class UserLogsController extends Controller
      */
     public function index()
     {
-        $userlogs = Logs::all();
+        $userlogs = array();
+        $logs = Logs::all();
+
+        foreach($logs as $log) {
+            $userlog = array();
+
+            array_push($userlog, $log->user);
+            array_push($userlog, $log->payment);
+            array_push($userlog, $log->order_detail);
+
+            array_push($userlogs, $userlog);
+        }
         return Inertia::render('UserLogs', ['userlogs' => $userlogs]);
     }
 

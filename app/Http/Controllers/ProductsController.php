@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Product;
 
+
 class ProductsController extends Controller
 {
     /**

@@ -225,12 +225,6 @@ export default function Payments(props) {
         return (
             <div className="flex flex-wrap gap-2">
                 <Button
-                    label="New"
-                    icon="pi pi-plus"
-                    severity="success"
-                    onClick={openNew}
-                />
-                <Button
                     label="Delete"
                     icon="pi pi-trash"
                     severity="danger"

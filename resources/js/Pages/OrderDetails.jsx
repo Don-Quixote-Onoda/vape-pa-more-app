@@ -46,12 +46,6 @@ export default function OrderDetails(props) {
         });
     };
 
-    const openNew = () => {
-        setOrderDetail(emptyOrderDetail);
-        setSubmitted(false);
-        setOrderDetailDialog(true);
-    };
-
     const hideDialog = () => {
         setSubmitted(false);
         setOrderDetailDialog(false);
@@ -219,12 +213,6 @@ export default function OrderDetails(props) {
     const leftToolbarTemplate = () => {
         return (
             <div className="flex flex-wrap gap-2">
-                <Button
-                    label="New"
-                    icon="pi pi-plus"
-                    severity="success"
-                    onClick={openNew}
-                />
                 <Button
                     label="Delete"
                     icon="pi pi-trash"
