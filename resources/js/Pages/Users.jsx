@@ -97,7 +97,7 @@ export default function Users(props) {
             user.email &&
             user.confirm_password
         ) {
-            let _users = [...users];  
+            let _users = [...users];
             let _user = { ...user };
 
             if (user.id) {
@@ -110,7 +110,6 @@ export default function Users(props) {
                     detail: "Product Updated",
                     life: 3000,
                 });
-
             } else {
                 _user.id = createId();
                 _user.image = "user-placeholder.svg";
@@ -123,23 +122,17 @@ export default function Users(props) {
                 });
             }
             setData(user);
-            post('api/user');
+            post("api/user");
             setUserDialog(false);
             setUser(emptyUser);
         }
         // // console.log('Ok');
-        
-
-        
-
-        
     };
 
     const editUser = (user) => {
         setUser({ ...user });
         setUserDialog(true);
     };
-    
 
     const confirmDeleteUser = (user) => {
         setUser(user);
@@ -265,12 +258,12 @@ export default function Users(props) {
         const val = (e.target && e.target.value) || "";
         let _user = { ...user };
 
-        if(user.password == val) {
+        if (user.password == val) {
             _user[`${name}`] = val;
         }
 
         setUser(_user);
-    }
+    };
 
     const leftToolbarTemplate = () => {
         return (
@@ -322,8 +315,7 @@ export default function Users(props) {
         setUser(_user);
 
         console.log(_user);
-
-    }
+    };
 
     const priceBodyTemplate = (rowData) => {
         return formatCurrency(rowData.price);
@@ -479,7 +471,11 @@ export default function Users(props) {
                                     selectionMode="multiple"
                                     exportable={false}
                                 ></Column>
-                                 <Column field="image" header="Image" body={imageBodyTemplate}></Column>
+                                <Column
+                                    field="image"
+                                    header="Image"
+                                    body={imageBodyTemplate}
+                                ></Column>
                                 <Column
                                     field="firstname"
                                     header="First Name"
@@ -546,19 +542,18 @@ export default function Users(props) {
                             onHide={hideDialog}
                         >
                             <div className="field">
-                            <label className="">User Image</label>
-                            <input
-                                type="file"
-                                className={`w-full px-4 py-2 ${classNames({
-                                    "p-invalid":
-                                        submitted && !user.image,
-                                })}`}
-                                label="Image"
-                                name="image"
-                                onChange={(e) =>
-                                    handleFileUpload(e, "image")
-                                }
-                            />
+                                <label className="">User Image</label>
+                                <input
+                                    type="file"
+                                    className={`w-full px-4 py-2 ${classNames({
+                                        "p-invalid": submitted && !user.image,
+                                    })}`}
+                                    label="Image"
+                                    name="image"
+                                    onChange={(e) =>
+                                        handleFileUpload(e, "image")
+                                    }
+                                />
                                 {submitted && !user.image && (
                                     <small className="p-error">
                                         User Image is required.
@@ -663,7 +658,8 @@ export default function Users(props) {
                                         onInputChange(e, "birthdate")
                                     }
                                     className={classNames({
-                                        "p-invalid": submitted && !user.birthdate,
+                                        "p-invalid":
+                                            submitted && !user.birthdate,
                                     })}
                                 />
                                 {submitted && !user.birthdate && (

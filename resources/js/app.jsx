@@ -14,7 +14,7 @@ import "primereact/resources/primereact.min.css";
 
 //icons
 import "primeicons/primeicons.css";           
-import 'primeflex/primeflex.css';                                 
+// import 'primeflex/primeflex.css';                                 
          
 
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';

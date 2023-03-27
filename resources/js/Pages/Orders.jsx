@@ -1,5 +1,5 @@
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Head } from "@inertiajs/react";
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { Head } from '@inertiajs/react';
 import React, { useState, useEffect, useRef } from "react";
 import { classNames } from "primereact/utils";
 import { DataTable } from "primereact/datatable";
@@ -15,43 +15,29 @@ import { InputNumber } from "primereact/inputnumber";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
-import { TabMenu } from "primereact/tabmenu";
-import { DataView, DataViewLayoutOptions } from 'primereact/dataview';
-import { ProductService } from "@/Service/ProductService";
 
 
-export default function Orders(props) {
-    const [orders, setOrders] = useState([]);
-    const [layout, setLayout] = useState('grid');
-    const [products, setProducts] = useState([]);
-
-    const [activeIndex, setActiveIndex] = useState(0);
-    useEffect(() => {
-        setOrders(props.orders);
-    }, []);
+export default function Order(props) {
 
     useEffect(() => {
-        ProductService.getProducts().then((data) => setProducts(data.slice(0, 12)));
-    }, []);
+        console.log(props);
+    });
+  const [orders, setOrders] = useState([]);
+  useEffect(() => {
+    setOrders(props.orders);
+  });
 
-    let emptyOrder = {
-        id: null,
-        order_number: "",
-        product_id: null,
-        quantity: "",
-        total_price: 0,
-    };
+  let emptyOrderDetail = {
+    id: null,
+    order_number: "",
+    total_amount: null,
+};
 
-    const items = [
-        { label: "Products", icon: "pi pi-fw pi-home" },
-        { label: "Orders", icon: "pi pi-fw pi-calendar" },
-    ];
-
-    const [orderDialog, setOrderDialog] = useState(false);
-    const [deleteOrderDialog, setDeleteOrderDialog] = useState(false);
-    const [deleteOrdersDialog, setDeleteOrdersDialog] = useState(false);
-    const [order, setOrder] = useState(emptyOrder);
-    const [selectedOrders, setSelectedOrders] = useState(null);
+    const [orderDetailDialog, setOrderDetailDialog] = useState(false);
+    const [deleteOrderDetailDialog, setDeleteOrderDetailDialog] = useState(false);
+    const [deleteOrderDetailsDialog, setDeleteOrderDetailsDialog] = useState(false);
+    const [orderDetail, setOrderDetail] = useState(emptyOrderDetail);
+    const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
     const [submitted, setSubmitted] = useState(false);
     const [globalFilter, setGlobalFilter] = useState(null);
     const toast = useRef(null);
@@ -66,28 +52,28 @@ export default function Orders(props) {
 
     const hideDialog = () => {
         setSubmitted(false);
-        setOrderDialog(false);
+        setOrderDetailDialog(false);
     };
 
-    const hideDeleteOrderDialog = () => {
-        setDeleteOrderDialog(false);
+    const hideDeleteOrderDetailDialog = () => {
+        setDeleteOrderDetailDialog(false);
     };
 
-    const hideDeleteOrdersDialog = () => {
-        setDeleteOrdersDialog(false);
+    const hideDeleteOrderDetailsDialog = () => {
+        setDeleteOrderDetailsDialog(false);
     };
 
-    const saveOrder = () => {
+    const saveOrderDetail = () => {
         setSubmitted(true);
 
-        if (order.name.trim()) {
+        if (orderDetail.name.trim()) {
             let _orders = [...orders];
-            let _order = { ...order };
+            let _orderDetail = { ...orderDetail };
 
-            if (order.id) {
-                const index = findIndexById(order.id);
+            if (orderDetail.id) {
+                const index = findIndexById(orderDetail.id);
 
-                _orders[index] = _order;
+                _orders[index] = _orderDetail;
                 toast.current.show({
                     severity: "success",
                     summary: "Successful",
@@ -95,9 +81,9 @@ export default function Orders(props) {
                     life: 3000,
                 });
             } else {
-                _order.id = createId();
-                _order.image = "order-placeholder.svg";
-                _orders.push(_order);
+                _product.id = createId();
+                _product.image = "product-placeholder.svg";
+                _products.push(_product);
                 toast.current.show({
                     severity: "success",
                     summary: "Successful",
@@ -107,27 +93,27 @@ export default function Orders(props) {
             }
 
             setOrders(_orders);
-            setOrderDialog(false);
-            setOrder(emptyOrder);
+            setOrderDetailDialog(false);
+            setOrderDetail(emptyOrderDetail);
         }
     };
 
-    const editOrder = (order) => {
-        setOrder({ ...order });
-        setOrderDialog(true);
+    const editOrderDetail = (orderDetail) => {
+        setOrderDetail({ ...orderDetail });
+        setOrderDetailDialog(true);
     };
 
-    const confirmDeleteOrder = (order) => {
-        setOrder(order);
-        setDeleteOrderDialog(true);
+    const confirmDeleteOrderDetail = (orderDetail) => {
+        setOrderDetail(orderDetail);
+        setDeleteOrderDetailDialog(true);
     };
 
-    const deleteOrder = () => {
-        let _orders = orders.filter((val) => val.id !== order.id);
+    const deleteOrderDetail = () => {
+        let _products = products.filter((val) => val.id !== product.id);
 
-        setOrders(_orders);
-        setDeleteOrderDialog(false);
-        setOrder(emptyOrder);
+        setOrders(_products);
+        setDeleteOrderDetailDialog(false);
+        setOrderDetail(emptyOrderDetail);
         toast.current.show({
             severity: "success",
             summary: "Successful",
@@ -163,10 +149,10 @@ export default function Orders(props) {
 
     const cols = [
         { field: "id", header: "ID" },
-        { field: "order_number", header: "Name" },
-        { field: "product_id", header: "Image" },
-        { field: "quantity", header: "Type" },
-        { field: "total_price", header: "Price" },
+        { field: "product_id", header: "Product Name" },
+        { field: "order_number", header: "Order Number" },
+        { field: "quantity", header: "Quantity" },
+        { field: "total_price", header: "Total Price" },
     ];
 
     const exportColumns = cols.map((col) => ({
@@ -186,46 +172,48 @@ export default function Orders(props) {
     };
 
     const confirmDeleteSelected = () => {
-        setDeleteOrdersDialog(true);
+        setDeleteOrderDetailsDialog(true);
     };
 
-    const deleteSelectedOrders = () => {
-        let _orders = orders.filter((val) => !selectedOrders.includes(val));
+    const deleteSelectedOrderDetails = () => {
+        let _orders = orders.filter(
+            (val) => !selectedOrderDetails.includes(val)
+        );
 
         setOrders(_orders);
-        setDeleteOrdersDialog(false);
-        setSelectedOrders(null);
+        setDeleteOrderDetailsDialog(false);
+        setSelectedOrderDetails(null);
         toast.current.show({
             severity: "success",
             summary: "Successful",
-            detail: "orders Deleted",
+            detail: "Order Deleted",
             life: 3000,
         });
     };
 
     const onCategoryChange = (e) => {
-        let _order = { ...order };
+        let _orderDetail = { ...orderDetail };
 
-        _order["category"] = e.value;
-        setOrder(_order);
+        _orderDetail["category"] = e.value;
+        setOrderDetail(_orderDetail);
     };
 
     const onInputChange = (e, name) => {
         const val = (e.target && e.target.value) || "";
-        let _order = { ...order };
+        let _orderDetail = { ...orderDetail };
 
-        _order[`${name}`] = val;
+        _orderDetail[`${name}`] = val;
 
-        setOrder(_order);
+        setOrderDetail(_orderDetail);
     };
 
     const onInputNumberChange = (e, name) => {
         const val = e.value || 0;
-        let _order = { ...order };
+        let _orderDetail = { ...orderDetail };
 
-        _order[`${name}`] = val;
+        _orderDetail[`${name}`] = val;
 
-        setOrder(_order);
+        setOrderDetail(_orderDetail);
     };
 
     const leftToolbarTemplate = () => {
@@ -236,7 +224,7 @@ export default function Orders(props) {
                     icon="pi pi-trash"
                     severity="danger"
                     onClick={confirmDeleteSelected}
-                    disabled={!selectedOrders || !selectedOrders.length}
+                    disabled={!selectedOrderDetails || !selectedOrderDetails.length}
                 />
             </div>
         );
@@ -256,7 +244,7 @@ export default function Orders(props) {
     const imageBodyTemplate = (rowData) => {
         return (
             <img
-                src={`https://primefaces.org/cdn/primereact/images/order/${rowData.image}`}
+                src={`https://primefaces.org/cdn/primereact/images/product/${rowData.image}`}
                 alt={rowData.image}
                 className="shadow-2 border-round"
                 style={{ width: "64px" }}
@@ -289,21 +277,21 @@ export default function Orders(props) {
                     rounded
                     outlined
                     className="mr-2"
-                    onClick={() => editOrder(rowData)}
+                    onClick={() => editOrderDetail(rowData)}
                 />
                 <Button
                     icon="pi pi-trash"
                     rounded
                     outlined
                     severity="danger"
-                    onClick={() => confirmDeleteOrder(rowData)}
+                    onClick={() => confirmDeleteOrderDetail(rowData)}
                 />
             </React.Fragment>
         );
     };
 
-    const getSeverity = (order) => {
-        switch (order.inventoryStatus) {
+    const getSeverity = (orderDetail) => {
+        switch (orderDetail.inventoryStatus) {
             case "INSTOCK":
                 return "success";
 
@@ -318,67 +306,6 @@ export default function Orders(props) {
         }
     };
 
-    const listItem = (product) => {
-        return (
-            <div className="col-12">
-                <div className="flex flex-column xl:flex-row xl:align-items-start p-4 gap-4">
-                    <img className="w-9 sm:w-16rem xl:w-10rem shadow-2 block xl:block mx-auto border-round" src={`https://primefaces.org/cdn/primereact/images/product/${product.image}`} alt={product.name} />
-                    <div className="flex flex-column sm:flex-row justify-content-between align-items-center xl:align-items-start flex-1 gap-4">
-                        <div className="flex flex-column align-items-center sm:align-items-start gap-3">
-                            <div className="text-2xl font-bold text-900">{product.name}</div>
-                            <Rating value={product.rating} readOnly cancel={false}></Rating>
-                            <div className="flex align-items-center gap-3">
-                                <span className="flex align-items-center gap-2">
-                                    <i className="pi pi-tag"></i>
-                                    <span className="font-semibold">{product.category}</span>
-                                </span>
-                                <Tag value={product.inventoryStatus} severity={getSeverity(product)}></Tag>
-                            </div>
-                        </div>
-                        <div className="flex sm:flex-column align-items-center sm:align-items-end gap-3 sm:gap-2">
-                            <span className="text-2xl font-semibold">${product.price}</span>
-                            <Button icon="pi pi-shopping-cart" className="p-button-rounded" disabled={product.inventoryStatus === 'OUTOFSTOCK'}></Button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    };
-
-    const gridItem = (product) => {
-        return (
-            <div className="col-12 sm:col-6 lg:col-12 xl:col-4 p-2">
-                <div className="p-4 border-1 surface-border surface-card border-round">
-                    <div className="flex flex-wrap align-items-center justify-content-between gap-2">
-                        <div className="flex align-items-center gap-2">
-                            <i className="pi pi-tag"></i>
-                            <span className="font-semibold">{product.category}</span>
-                        </div>
-                        <Tag value={product.inventoryStatus} severity={getSeverity(product)}></Tag>
-                    </div>
-                    <div className="flex flex-column align-items-center gap-3 py-5">
-                        <img className="w-9 shadow-2 border-round" src={`https://primefaces.org/cdn/primereact/images/product/${product.image}`} alt={product.name} />
-                        <div className="text-2xl font-bold">{product.name}</div>
-                        <Rating value={product.rating} readOnly cancel={false}></Rating>
-                    </div>
-                    <div className="flex align-items-center justify-content-between">
-                        <span className="text-2xl font-semibold">${product.price}</span>
-                        <Button icon="pi pi-shopping-cart" className="p-button-rounded" disabled={product.inventoryStatus === 'OUTOFSTOCK'}></Button>
-                    </div>
-                </div>
-            </div>
-        );
-    };
-
-    const itemTemplate = (product, layout) => {
-        if (!product) {
-            return;
-        }
-
-        if (layout === 'list') return listItem(product);
-        else if (layout === 'grid') return gridItem(product);
-    };
-
     const header = (
         <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
             <span className="p-input-icon-left">
@@ -391,15 +318,7 @@ export default function Orders(props) {
             </span>
         </div>
     );
-
-    const gridHeader = () => {
-        return (
-            <div className="flex justify-content-end">
-                <DataViewLayoutOptions layout={layout} onChange={(e) => setLayout(e.value)} />
-            </div>
-        );
-    };
-    const orderDialogFooter = (
+    const orderDetailDialogFooter = (
         <React.Fragment>
             <Button
                 label="Cancel"
@@ -407,65 +326,55 @@ export default function Orders(props) {
                 outlined
                 onClick={hideDialog}
             />
-            <Button label="Save" icon="pi pi-check" onClick={saveOrder} />
+            <Button label="Save" icon="pi pi-check" onClick={saveOrderDetail} />
         </React.Fragment>
     );
-    const deleteOrderDialogFooter = (
+    const deleteOrderDetailDialogFooter = (
         <React.Fragment>
             <Button
                 label="No"
                 icon="pi pi-times"
                 outlined
-                onClick={hideDeleteOrderDialog}
+                onClick={hideDeleteOrderDetailDialog}
             />
             <Button
                 label="Yes"
                 icon="pi pi-check"
                 severity="danger"
-                onClick={deleteOrder}
+                onClick={deleteOrderDetail}
             />
         </React.Fragment>
     );
-    const deleteOrdersDialogFooter = (
+    const deleteOrderDetailsDialogFooter = (
         <React.Fragment>
             <Button
                 label="No"
                 icon="pi pi-times"
                 outlined
-                onClick={hideDeleteOrdersDialog}
+                onClick={hideDeleteOrderDetailsDialog}
             />
             <Button
                 label="Yes"
                 icon="pi pi-check"
                 severity="danger"
-                onClick={deleteSelectedOrders}
+                onClick={deleteSelectedOrderDetails}
             />
         </React.Fragment>
     );
+
     return (
         <AuthenticatedLayout
             auth={props.auth}
             errors={props.errors}
-            header={
-                <h2 className="font-semibold text-xl text-gray-800 leading-tight">
-                    Orders
-                </h2>
-            }
+            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Orders</h2>}
         >
-            <div className="card">
-                <TabMenu
-                    model={items}
-                    activeIndex={activeIndex}
-                    onTabChange={(e) => setActiveIndex(e.index)}
-                />
-            </div>
-            {activeIndex == 1 && <div class="container px-6 mx-auto grid">
-                <h2 class="my-6 text-2xl font-semibold text-gray-700 dark:text-gray-200">
+            <div className="container px-6 mx-auto grid">
+                <h2 className="my-6 text-2xl font-semibold text-gray-700 dark:text-gray-200">
                     Orders
                 </h2>
                 <div className="w-full mb-8 overflow-hidden rounded-lg shadow-xs">
                     <div className="w-full overflow-x-auto card">
-                        <Toast ref={toast} />
+                    <Toast ref={toast} />
                         <div className="card">
                             <Toolbar
                                 className="mb-4"
@@ -476,16 +385,16 @@ export default function Orders(props) {
                             <DataTable
                                 ref={dt}
                                 value={orders}
-                                selection={selectedOrders}
+                                selection={selectedOrderDetails}
                                 onSelectionChange={(e) =>
-                                    setSelectedOrders(e.value)
+                                    setSelectedOrderDetails(e.value)
                                 }
                                 dataKey="id"
                                 paginator
                                 rows={10}
                                 rowsPerPageOptions={[5, 10, 25]}
                                 paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} orders"
+                                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} order details"
                                 globalFilter={globalFilter}
                                 header={header}
                             >
@@ -494,28 +403,28 @@ export default function Orders(props) {
                                     exportable={false}
                                 ></Column>
                                 <Column
+                                    field="product_id"
+                                    header="Product Name"
+                                    sortable
+                                    style={{ minWidth: "16rem" }}
+                                ></Column>
+                                <Column
                                     field="order_number"
                                     header="Order Number"
                                     sortable
                                     style={{ minWidth: "16rem" }}
                                 ></Column>
                                 <Column
-                                    field="product_id"
-                                    header="Product Name"
-                                    sortable
-                                    style={{ minWidth: "8rem" }}
-                                ></Column>
-                                <Column
                                     field="quantity"
                                     header="Quantity"
                                     sortable
-                                    style={{ minWidth: "10rem" }}
+                                    style={{ minWidth: "8rem" }}
                                 ></Column>
                                 <Column
                                     field="total_price"
                                     header="Total Price"
                                     sortable
-                                    style={{ minWidth: "12rem" }}
+                                    style={{ minWidth: "8rem" }}
                                 ></Column>
                                 <Column
                                     body={actionBodyTemplate}
@@ -525,20 +434,20 @@ export default function Orders(props) {
                             </DataTable>
                         </div>
                         <Dialog
-                            visible={orderDialog}
+                            visible={orderDetailDialog}
                             style={{ width: "32rem" }}
                             breakpoints={{ "960px": "75vw", "641px": "90vw" }}
-                            header="Order Details"
+                            header="Orders"
                             modal
                             className="p-fluid"
-                            footer={orderDialogFooter}
+                            footer={orderDetailDialogFooter}
                             onHide={hideDialog}
                         >
-                            {order.image && (
+                            {orderDetail.image && (
                                 <img
-                                    src={`https://primefaces.org/cdn/primereact/images/order/${order.image}`}
-                                    alt={order.image}
-                                    className="order-image block m-auto pb-3"
+                                    src={`https://primefaces.org/cdn/primereact/images/orderDetail/${orderDetail.image}`}
+                                    alt={orderDetail.image}
+                                    className="orderDetail-image block m-auto pb-3"
                                 />
                             )}
                             <div className="field">
@@ -547,15 +456,15 @@ export default function Orders(props) {
                                 </label>
                                 <InputText
                                     id="name"
-                                    value={order.name}
+                                    value={orderDetail.name}
                                     onChange={(e) => onInputChange(e, "name")}
                                     required
                                     autoFocus
                                     className={classNames({
-                                        "p-invalid": submitted && !order.name,
+                                        "p-invalid": submitted && !orderDetail.name,
                                     })}
                                 />
-                                {submitted && !order.name && (
+                                {submitted && !orderDetail.name && (
                                     <small className="p-error">
                                         Name is required.
                                     </small>
@@ -570,7 +479,7 @@ export default function Orders(props) {
                                 </label>
                                 <InputTextarea
                                     id="description"
-                                    value={order.description}
+                                    value={orderDetail.description}
                                     onChange={(e) =>
                                         onInputChange(e, "description")
                                     }
@@ -591,7 +500,8 @@ export default function Orders(props) {
                                             value="Accessories"
                                             onChange={onCategoryChange}
                                             checked={
-                                                order.category === "Accessories"
+                                                orderDetail.category ===
+                                                "Accessories"
                                             }
                                         />
                                         <label htmlFor="category1">
@@ -605,7 +515,7 @@ export default function Orders(props) {
                                             value="Clothing"
                                             onChange={onCategoryChange}
                                             checked={
-                                                order.category === "Clothing"
+                                                orderDetail.category === "Clothing"
                                             }
                                         />
                                         <label htmlFor="category2">
@@ -619,7 +529,8 @@ export default function Orders(props) {
                                             value="Electronics"
                                             onChange={onCategoryChange}
                                             checked={
-                                                order.category === "Electronics"
+                                                orderDetail.category ===
+                                                "Electronics"
                                             }
                                         />
                                         <label htmlFor="category3">
@@ -633,7 +544,7 @@ export default function Orders(props) {
                                             value="Fitness"
                                             onChange={onCategoryChange}
                                             checked={
-                                                order.category === "Fitness"
+                                                orderDetail.category === "Fitness"
                                             }
                                         />
                                         <label htmlFor="category4">
@@ -652,7 +563,7 @@ export default function Orders(props) {
                                     </label>
                                     <InputNumber
                                         id="price"
-                                        value={order.price}
+                                        value={orderDetail.price}
                                         onValueChange={(e) =>
                                             onInputNumberChange(e, "price")
                                         }
@@ -670,7 +581,7 @@ export default function Orders(props) {
                                     </label>
                                     <InputNumber
                                         id="quantity"
-                                        value={order.quantity}
+                                        value={orderDetail.quantity}
                                         onValueChange={(e) =>
                                             onInputNumberChange(e, "quantity")
                                         }
@@ -678,58 +589,53 @@ export default function Orders(props) {
                                 </div>
                             </div>
                         </Dialog>
-
                         <Dialog
-                            visible={deleteOrderDialog}
+                            visible={deleteOrderDetailDialog}
                             style={{ width: "32rem" }}
                             breakpoints={{ "960px": "75vw", "641px": "90vw" }}
                             header="Confirm"
                             modal
-                            footer={deleteOrderDialogFooter}
-                            onHide={hideDeleteOrderDialog}
+                            footer={deleteOrderDetailDialogFooter}
+                            onHide={hideDeleteOrderDetailDialog}
                         >
                             <div className="confirmation-content">
                                 <i
                                     className="pi pi-exclamation-triangle mr-3"
                                     style={{ fontSize: "2rem" }}
                                 />
-                                {order && (
+                                {orderDetail && (
                                     <span>
                                         Are you sure you want to delete{" "}
-                                        <b>{order.name}</b>?
+                                        <b>{orderDetail.name}</b>?
                                     </span>
                                 )}
                             </div>
                         </Dialog>
                         <Dialog
-                            visible={deleteOrdersDialog}
+                            visible={deleteOrderDetailsDialog}
                             style={{ width: "32rem" }}
                             breakpoints={{ "960px": "75vw", "641px": "90vw" }}
                             header="Confirm"
                             modal
-                            footer={deleteOrdersDialogFooter}
-                            onHide={hideDeleteOrdersDialog}
+                            footer={deleteOrderDetailsDialogFooter}
+                            onHide={hideDeleteOrderDetailsDialog}
                         >
                             <div className="confirmation-content">
                                 <i
                                     className="pi pi-exclamation-triangle mr-3"
                                     style={{ fontSize: "2rem" }}
                                 />
-                                {order && (
+                                {orderDetail && (
                                     <span>
                                         Are you sure you want to delete the
-                                        selected orders?
+                                        selected order details?
                                     </span>
                                 )}
                             </div>
                         </Dialog>
                     </div>
                 </div>
-            </div>}
-
-            {activeIndex == 0 && <div className="card">
-            <DataView value={products} itemTemplate={itemTemplate} layout={layout} header={gridHeader()} />
-        </div>}
+            </div>
         </AuthenticatedLayout>
     );
 }
